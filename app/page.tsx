@@ -295,11 +295,11 @@ export default function AIBAProject() {
                   </div>
                   <h2 className="text-xl font-bold mb-2">Requirement Intake</h2>
                   <p className="text-slate-500 text-xs leading-relaxed">
-                    Describe your project or feature feature title to begin. I'll act as your senior Business Analyst to refine the vision.
+                    Describe your project or feature feature title to begin. I{"'"}ll act as your senior Business Analyst to refine the vision.
                   </p>
                   <div className="mt-8 grid grid-cols-2 gap-2 w-full">
-                    <button onClick={() => setInput("Build a customer loyalty dashboard for a coffee shop")} className="bg-white/5 border border-white/5 p-2 rounded-lg text-[10px] hover:bg-white/10 text-slate-400 transition-all">"Customer loyalty dashboard"</button>
-                    <button onClick={() => setInput("Implement real-time shipment status visibility")} className="bg-white/5 border border-white/5 p-2 rounded-lg text-[10px] hover:bg-white/10 text-slate-400 transition-all">"Real-time shipment status"</button>
+                    <button onClick={() => setInput("Build a customer loyalty dashboard for a coffee shop")} className="bg-white/5 border border-white/5 p-2 rounded-lg text-[10px] hover:bg-white/10 text-slate-400 transition-all">{"\""}Customer loyalty dashboard{"\""}</button>
+                    <button onClick={() => setInput("Implement real-time shipment status visibility")} className="bg-white/5 border border-white/5 p-2 rounded-lg text-[10px] hover:bg-white/10 text-slate-400 transition-all">{"\""}Real-time shipment status{"\""}</button>
                   </div>
                 </div>
               ) : (
@@ -424,13 +424,6 @@ export default function AIBAProject() {
         </div>
       </main>
 
-      <style jsx global>{`
-        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.03); border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.08); }
-        .prose pre { background: rgba(0,0,0,0.3) !important; border: 1px solid rgba(255,255,255,0.05); }
-      `}</style>
     </div>
   )
 }

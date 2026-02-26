@@ -31,7 +31,8 @@ export async function POST(req: Request) {
                 'Content-Disposition': `attachment; filename="${title || 'PRD'}.docx"`,
             },
         });
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+    } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        return NextResponse.json({ error: errorMessage }, { status: 500 });
     }
 }
