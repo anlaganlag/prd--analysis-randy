@@ -6,7 +6,7 @@ import {
   Send, Bot, User, Trash2, FileText, Download,
   Settings, Zap, AlertCircle, Loader2, Sparkles,
   ChevronRight, PanelLeftClose, PanelLeftOpen,
-  HelpCircle, ListChecks, CheckCircle2, Circle, GraduationCap
+  HelpCircle, ListChecks, CheckCircle2, Circle, GraduationCap, Network
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import ReactMarkdown from 'react-markdown'
@@ -17,7 +17,7 @@ interface Message {
   content: string
 }
 
-type WorkflowStep = 'capture' | 'interview' | 'gap' | 'prd' | 'stories'
+type WorkflowStep = 'capture' | 'interview' | 'gap' | 'prd' | 'impact' | 'stories'
 
 export default function AIBAProject() {
   // --- State ---
@@ -28,6 +28,7 @@ export default function AIBAProject() {
   const [companyContext, setCompanyContext] = useState('')
   const [currentPrd, setCurrentPrd] = useState('')
   const [currentStories, setCurrentStories] = useState('')
+  const [currentAnalysis, setCurrentAnalysis] = useState('')
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [workflowStep, setWorkflowStep] = useState<WorkflowStep>('capture')
 
@@ -54,6 +55,7 @@ export default function AIBAProject() {
     // Update workflow step based on action
     if (mode === 'interview') setWorkflowStep('interview')
     if (mode === 'default' && (prompt.toLowerCase().includes('draft') || prompt.toLowerCase().includes('generate'))) setWorkflowStep('prd')
+    if (mode === 'impact') setWorkflowStep('impact')
     if (mode === 'stories') setWorkflowStep('stories')
 
     try {
@@ -88,9 +90,11 @@ export default function AIBAProject() {
         // Auto-detect PRD content or User Stories
         if (mode === 'stories') {
           setCurrentStories(assistantContent)
+        } else if (mode === 'impact') {
+          setCurrentAnalysis(assistantContent)
         } else if (assistantContent.includes('## 1.') || assistantContent.includes('Objective')) {
           setCurrentPrd(assistantContent)
-          if (workflowStep !== 'prd' && workflowStep !== 'stories') setWorkflowStep('prd')
+          if (workflowStep !== 'prd' && workflowStep !== 'stories' && workflowStep !== 'impact') setWorkflowStep('prd')
         }
       }
 
@@ -126,6 +130,7 @@ export default function AIBAProject() {
     setMessages([])
     setCurrentPrd('')
     setCurrentStories('')
+    setCurrentAnalysis('')
     setWorkflowStep('capture')
   }
 
@@ -134,6 +139,7 @@ export default function AIBAProject() {
     { id: 'interview', label: 'Interview', icon: <HelpCircle size={14} /> },
     { id: 'gap', label: 'Gap Analysis', icon: <AlertCircle size={14} /> },
     { id: 'prd', label: 'PRD', icon: <FileText size={14} /> },
+    { id: 'impact', label: 'Impact', icon: <Network size={14} /> },
     { id: 'stories', label: 'Stories', icon: <ListChecks size={14} /> },
   ]
 
@@ -206,13 +212,22 @@ export default function AIBAProject() {
                   Generate Full PRD
                 </button>
                 {currentPrd && (
-                  <button
-                    onClick={() => handleChat(undefined, "Now decompose this PRD into detailed User Stories with GIVEN/WHEN/THEN AC.", "stories")}
-                    className="w-full flex items-center gap-2 text-xs text-slate-300 hover:text-white bg-indigo-500/10 hover:bg-indigo-500/20 p-2 rounded-lg transition-colors border border-indigo-500/20"
-                  >
-                    <ListChecks className="w-4 h-4 text-indigo-400" />
-                    Decompose Stories
-                  </button>
+                  <>
+                    <button
+                      onClick={() => handleChat(undefined, "Perform a deep-dive System Impact and Dependency Analysis on this PRD.", "impact")}
+                      className="w-full flex items-center gap-2 text-xs text-slate-300 hover:text-white bg-purple-500/10 hover:bg-purple-500/20 p-2 rounded-lg transition-colors border border-purple-500/20"
+                    >
+                      <Network className="w-4 h-4 text-purple-400" />
+                      Impact Analysis
+                    </button>
+                    <button
+                      onClick={() => handleChat(undefined, "Now decompose this PRD into detailed User Stories with GIVEN/WHEN/THEN AC.", "stories")}
+                      className="w-full flex items-center gap-2 text-xs text-slate-300 hover:text-white bg-indigo-500/10 hover:bg-indigo-500/20 p-2 rounded-lg transition-colors border border-indigo-500/20"
+                    >
+                      <ListChecks className="w-4 h-4 text-indigo-400" />
+                      Decompose Stories
+                    </button>
+                  </>
                 )}
               </div>
             </section>
@@ -383,10 +398,31 @@ export default function AIBAProject() {
             </div>
 
             <div className="flex-1 overflow-y-auto p-8 custom-scrollbar h-full">
-              {!currentPrd && !currentStories ? (
-                <div className="h-full flex flex-col items-center justify-center text-slate-700">
-                  <FileText className="w-10 h-10 mb-4 opacity-5" />
-                  <p className="text-[11px] uppercase tracking-widest font-bold">Waiting for input...</p>
+              {!currentPrd && !currentStories && !currentAnalysis ? (
+                <div className="h-full flex flex-col items-center justify-center p-8">
+                  <div className="max-w-md w-full border border-white/5 rounded-2xl bg-white/[0.02] p-6 shadow-2xl">
+                    <h3 className="text-sm font-bold text-slate-400 mb-4 flex items-center gap-2 uppercase tracking-widest border-b border-white/5 pb-3">
+                      <FileText className="w-4 h-4 text-indigo-500" />
+                      Live Artifact Output Structure
+                    </h3>
+                    <div className="space-y-3">
+                      {[
+                        "1. Feature Title", "2. Business Problem", "3. Value Statement",
+                        "4. Success Metrics", "5. Scope Definition", "6. Functional Behavior",
+                        "7. Acceptance Criteria", "8. Non-Functional Req", "9. Dependencies",
+                        "10. Breakdown Guidance", "11. Risks & Assumptions"
+                      ].map((item, idx) => (
+                        <div key={idx} className="flex items-center gap-3 text-xs text-slate-600">
+                          <div className="w-1.5 h-1.5 rounded-full bg-slate-700/50"></div>
+                          {item}
+                        </div>
+                      ))}
+                    </div>
+                    <div className="mt-6 pt-4 border-t border-white/5 text-[10px] text-slate-500 bg-indigo-500/5 p-3 rounded-lg border border-indigo-500/10 flex items-start gap-2">
+                      <Sparkles className="w-3.5 h-3.5 text-indigo-400 shrink-0 mt-0.5" />
+                      <p>Start chatting on the left to generate content. The structured PRD will dynamically appear here.</p>
+                    </div>
+                  </div>
                 </div>
               ) : (
                 <div className="max-w-2xl mx-auto space-y-12 pb-20">
@@ -402,7 +438,23 @@ export default function AIBAProject() {
                   )}
 
                   {/* Stories Section separator */}
-                  {currentPrd && currentStories && <div className="h-px bg-white/5 my-12 shadow-[0_0_15px_rgba(79,70,229,0.1)]"></div>}
+                  {currentPrd && (currentStories || currentAnalysis) && <div className="h-px bg-white/5 my-12 shadow-[0_0_15px_rgba(79,70,229,0.1)]"></div>}
+
+                  {/* Impact Analysis Section */}
+                  {currentAnalysis && (
+                    <section>
+                      <div className="flex items-center gap-2 mb-6 text-purple-400 bg-purple-500/5 p-3 rounded-xl border border-purple-500/10 w-fit">
+                        <Network size={18} />
+                        <h2 className="text-sm font-bold uppercase tracking-widest m-0">Impact & Dependency Analysis</h2>
+                      </div>
+                      <article className="prose prose-invert prose-indigo prose-sm max-w-none">
+                        <ReactMarkdown>{currentAnalysis}</ReactMarkdown>
+                      </article>
+                    </section>
+                  )}
+
+                  {/* Spacer if both are present */}
+                  {currentAnalysis && currentStories && <div className="h-px bg-white/5 my-12 shadow-[0_0_15px_rgba(79,70,229,0.1)]"></div>}
 
                   {/* User Stories Section */}
                   {currentStories && (

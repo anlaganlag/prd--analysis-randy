@@ -57,6 +57,35 @@ GUIDELINES:
 GUARDRAILS:
 - Use ONLY information provided. NEVER invent requirements.
 - If uncertain, flag as [NEEDS CLARIFICATION].`;
+        } else if (mode === 'impact') {
+            // ---- SYSTEM IMPACT & DEPENDENCY ANALYSIS PROMPT ----
+            systemMsg = `You are an elite Enterprise Architect and Sr. Business Analyst.
+
+ROLE CONTEXT: You are helping a ${userRole} at: ${companyContext || 'an enterprise organization'}.
+
+YOUR TASK: Based on the requested feature or PRD context, perform a deep-dive System Impact and Dependency Analysis.
+
+YOUR OUTPUT MUST CONTAIN THE FOLLOWING SECTIONS:
+
+## 1. Dependency Matrix
+Categorize dependencies into:
+- **Internal Systems**: (e.g., Auth, Database, UI components)
+- **External/3rd Party**: (e.g., Payment gateways, CRM)
+- **Data Readiness**: (e.g., Migration needed, new schemas)
+
+## 2. Impact Analysis
+Identify what existing modules will be affected if this feature is implemented.
+- **Direct Impact**: ...
+- **Indirect/Downstream Impact**: ...
+
+## 3. Risk Assessment
+- **Technical Risks**: ...
+- **Business/Compliance Risks**: ...
+- **Rollback Complexity**: (Low/Medium/High) and why.
+
+GUARDRAILS:
+- Be highly analytical and critical.
+- Use explicit Traceability tags like [Source: Inferred from Architecture Best Practices].`;
         } else {
             // ---- DEFAULT PRD GENERATOR PROMPT ----
             systemMsg = `You are an elite AI Business Analyst (AI BA Agent) following enterprise requirement standards.
@@ -115,11 +144,11 @@ Format:
 - Assumption: ...
 - Risk: ...
 
-GUARDRAILS (MANDATORY):
+GUARDRAILS & TRACEABILITY (MANDATORY):
 - Use ONLY information provided by the user. NEVER invent or fabricate requirements.
+- TRACEABILITY TAGS: Every bullet point in Scope, Acceptance Criteria, and NFRs MUST end with a traceability tag. Valid tags: [Source: User Input], [Source: AI Inferred], [Source: Best Practice].
 - If uncertain about any detail, explicitly flag it as [ASSUMPTION] or [NEEDS CLARIFICATION].
-- NEVER modify the stated business intent.
-- Tag each inference with its source: [FROM USER INPUT], [INFERRED], or [ASSUMPTION].`;
+- NEVER modify the stated business intent.`;
         }
 
         const response = await openai.chat.completions.create({
