@@ -31,6 +31,8 @@ export default function AIBAProject() {
   const [currentAnalysis, setCurrentAnalysis] = useState('')
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [workflowStep, setWorkflowStep] = useState<WorkflowStep>('capture')
+  const [projects, setProjects] = useState<any[]>([])
+  const [currentProjectId, setCurrentProjectId] = useState<string | null>(null)
 
   const scrollRef = useRef<HTMLDivElement>(null)
 
@@ -40,6 +42,18 @@ export default function AIBAProject() {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight
     }
   }, [messages])
+
+  useEffect(() => {
+    fetchProjects()
+  }, [])
+
+  const fetchProjects = async () => {
+    const { data, error } = await supabase
+      .from('projects')
+      .select('*')
+      .order('created_at', { ascending: false })
+    if (!error && data) setProjects(data)
+  }
 
   // --- Actions ---
   const handleChat = async (e?: React.FormEvent, customPrompt?: string, mode: string = 'default') => {
@@ -106,6 +120,11 @@ export default function AIBAProject() {
         }))
       )
 
+      // Auto-save after successful stream
+      if (assistantContent.includes('##') || mode === 'stories' || mode === 'impact') {
+        saveProject()
+      }
+
     } catch (err) {
       console.error(err)
     } finally {
@@ -132,6 +151,38 @@ export default function AIBAProject() {
     setCurrentStories('')
     setCurrentAnalysis('')
     setWorkflowStep('capture')
+    setCurrentProjectId(null)
+  }
+
+  const loadProject = (project: any) => {
+    setCurrentProjectId(project.id)
+    setCurrentPrd(project.full_prd || '')
+    setCurrentStories(project.user_stories || '')
+    setCurrentAnalysis(project.impact_analysis || '')
+    setMessages([
+      { role: 'user', content: `Loading project: ${project.title}` },
+      { role: 'assistant', content: `Loaded "${project.title}". You can continue refining the PRD, generating stories, or analyzing impacts.` }
+    ])
+    setWorkflowStep('prd')
+  }
+
+  const saveProject = async () => {
+    const title = messages.find(m => m.role === 'user')?.content.slice(0, 50) || 'Untitled Project'
+    const projectData = {
+      title,
+      full_prd: currentPrd,
+      user_stories: currentStories,
+      impact_analysis: currentAnalysis,
+      updated_at: new Date().toISOString()
+    }
+
+    if (currentProjectId) {
+      await supabase.from('projects').update(projectData).eq('id', currentProjectId)
+    } else {
+      const { data, error } = await supabase.from('projects').insert([projectData]).select()
+      if (!error && data) setCurrentProjectId(data[0].id)
+    }
+    fetchProjects()
   }
 
   const steps = [
@@ -235,11 +286,35 @@ export default function AIBAProject() {
             <section className="pt-4 border-t border-white/5">
               <button
                 onClick={clearChat}
-                className="flex items-center gap-2 text-[10px] uppercase font-bold text-slate-500 hover:text-rose-400 transition-colors"
+                className="flex items-center gap-2 text-[10px] uppercase font-bold text-slate-500 hover:text-rose-400 transition-colors mb-4"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 Clear Workspace
               </button>
+
+              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 block">History</label>
+              <div className="space-y-1 max-h-48 overflow-y-auto custom-scrollbar pr-2">
+                {projects.map((p) => (
+                  <button
+                    key={p.id}
+                    onClick={() => loadProject(p)}
+                    className={cn(
+                      "w-full text-left p-2 rounded-lg text-[11px] transition-all border group relative",
+                      currentProjectId === p.id
+                        ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-300"
+                        : "bg-white/5 border-transparent text-slate-400 hover:bg-white/10"
+                    )}
+                  >
+                    <div className="truncate pr-4 font-medium">{p.title}</div>
+                    <div className="text-[9px] text-slate-600 mt-0.5">
+                      {new Date(p.created_at).toLocaleDateString()}
+                    </div>
+                  </button>
+                ))}
+                {projects.length === 0 && (
+                  <div className="text-[10px] text-slate-600 italic py-2">No saved projects yet.</div>
+                )}
+              </div>
             </section>
           </div>
         </div>
@@ -377,7 +452,22 @@ export default function AIBAProject() {
                 <FileText className="w-4 h-4 text-indigo-500" />
                 <span className="font-semibold text-xs tracking-wide">LIVE ARTIFACTS</span>
               </div>
-              <div className="flex gap-2">
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={saveProject}
+                  className="flex items-center gap-1.5 bg-indigo-600/10 hover:bg-indigo-600/20 text-[10px] px-2.5 py-1.5 rounded-lg border border-indigo-600/20 transition-all text-indigo-400"
+                >
+                  <Download className="w-3.5 h-3.5" /> Save Project
+                </button>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(currentPrd || '')
+                    alert('PRD copied to clipboard!')
+                  }}
+                  className="flex items-center gap-1.5 bg-white/5 hover:bg-white/10 text-[10px] px-2.5 py-1.5 rounded-lg border border-white/10 transition-all text-slate-400 hover:text-white"
+                >
+                  <Sparkles className="w-3.5 h-3.5" /> Copy PRD
+                </button>
                 {currentPrd && (
                   <button
                     onClick={() => downloadDocx(currentPrd, 'PRD')}
