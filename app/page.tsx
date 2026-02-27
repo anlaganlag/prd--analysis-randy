@@ -33,6 +33,12 @@ export default function AIBAProject() {
   const [workflowStep, setWorkflowStep] = useState<WorkflowStep>('capture')
   const [projects, setProjects] = useState<any[]>([])
   const [currentProjectId, setCurrentProjectId] = useState<string | null>(null)
+  const [toast, setToast] = useState<string | null>(null)
+
+  const showToast = (msg: string) => {
+    setToast(msg)
+    setTimeout(() => setToast(null), 2500)
+  }
 
   const scrollRef = useRef<HTMLDivElement>(null)
 
@@ -428,11 +434,24 @@ export default function AIBAProject() {
 
             <div className="p-4 border-t border-white/5 bg-[#0a0a0b]">
               <form onSubmit={handleChat} className="max-w-2xl mx-auto relative group">
-                <input
+                <textarea
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder="Describe your feature..."
-                  className="w-full bg-white/5 border border-white/5 rounded-2xl py-3.5 pl-5 pr-12 focus:outline-none focus:ring-1 focus:ring-indigo-500/50 transition-all placeholder-slate-700 text-sm"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault()
+                      handleChat()
+                    }
+                  }}
+                  placeholder="Describe your feature... (Shift+Enter to new line)"
+                  rows={1}
+                  className="w-full bg-white/5 border border-white/5 rounded-2xl py-3.5 pl-5 pr-12 focus:outline-none focus:ring-1 focus:ring-indigo-500/50 transition-all placeholder-slate-700 text-sm resize-none overflow-hidden"
+                  style={{ minHeight: '52px', maxHeight: '160px' }}
+                  onInput={(e) => {
+                    const target = e.target as HTMLTextAreaElement
+                    target.style.height = 'auto'
+                    target.style.height = Math.min(target.scrollHeight, 160) + 'px'
+                  }}
                 />
                 <button
                   type="submit"
@@ -442,6 +461,7 @@ export default function AIBAProject() {
                   {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                 </button>
               </form>
+              <div className="text-center mt-1.5 text-[9px] text-slate-600">Enter to send · Shift+Enter for new line</div>
             </div>
           </section>
 
@@ -462,7 +482,7 @@ export default function AIBAProject() {
                 <button
                   onClick={() => {
                     navigator.clipboard.writeText(currentPrd || '')
-                    alert('PRD copied to clipboard!')
+                    showToast('✅ PRD copied to clipboard!')
                   }}
                   className="flex items-center gap-1.5 bg-white/5 hover:bg-white/10 text-[10px] px-2.5 py-1.5 rounded-lg border border-white/10 transition-all text-slate-400 hover:text-white"
                 >
@@ -565,6 +585,20 @@ export default function AIBAProject() {
 
         </div>
       </main>
+
+      {/* Toast Notification */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 30 }}
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-emerald-600 text-white text-xs font-medium px-5 py-2.5 rounded-full shadow-lg shadow-emerald-500/20 z-50"
+          >
+            {toast}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
     </div>
   )
