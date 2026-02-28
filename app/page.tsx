@@ -227,10 +227,10 @@ export default function AIBAProject() {
                 onChange={(e) => setUserRole(e.target.value)}
                 className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-indigo-500 outline-none transition-all"
               >
-                <option>Senior PM</option>
-                <option>Tech Lead</option>
-                <option>Startup Founder</option>
-                <option>Business Analyst</option>
+                <option>Customs Brokerage Lead</option>
+                <option>Logistics Product Manager</option>
+                <option>Supply Chain Analyst</option>
+                <option>Operations Director</option>
               </select>
             </section>
 
@@ -239,7 +239,7 @@ export default function AIBAProject() {
               <textarea
                 value={companyContext}
                 onChange={(e) => setCompanyContext(e.target.value)}
-                placeholder="e.g. B2B Fintech SaaS..."
+                placeholder="e.g. UPS Customs Brokerage, Cross-border eCommerce..."
                 className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs h-24 resize-none focus:ring-1 focus:ring-indigo-500 outline-none transition-all"
               />
             </section>
@@ -389,13 +389,13 @@ export default function AIBAProject() {
                   <div className="w-14 h-14 bg-white/5 rounded-2xl flex items-center justify-center mb-6 border border-white/10">
                     <Sparkles className="w-7 h-7 text-indigo-500" />
                   </div>
-                  <h2 className="text-xl font-bold mb-2">Requirement Intake</h2>
+                  <h2 className="text-xl font-bold mb-2">Logistics Requirement Intake</h2>
                   <p className="text-slate-500 text-xs leading-relaxed">
                     Describe your project or feature feature title to begin. I{"'"}ll act as your senior Business Analyst to refine the vision.
                   </p>
                   <div className="mt-8 grid grid-cols-2 gap-2 w-full">
-                    <button onClick={() => setInput("Build a customer loyalty dashboard for a coffee shop")} className="bg-white/5 border border-white/5 p-2 rounded-lg text-[10px] hover:bg-white/10 text-slate-400 transition-all">{"\""}Customer loyalty dashboard{"\""}</button>
-                    <button onClick={() => setInput("Implement real-time shipment status visibility")} className="bg-white/5 border border-white/5 p-2 rounded-lg text-[10px] hover:bg-white/10 text-slate-400 transition-all">{"\""}Real-time shipment status{"\""}</button>
+                    <button onClick={() => setInput("Automate customs hold missing document collection for clearing delays")} className="bg-white/5 border border-white/5 p-2 rounded-lg text-[10px] hover:bg-white/10 text-slate-400 transition-all cursor-pointer">{"\""}Automate customs hold doc collection{"\""}</button>
+                    <button onClick={() => setInput("Implement real-time shipment status visibility for broker dashboard")} className="bg-white/5 border border-white/5 p-2 rounded-lg text-[10px] hover:bg-white/10 text-slate-400 transition-all cursor-pointer">{"\""}Real-time broker dashboard{"\""}</button>
                   </div>
                 </div>
               ) : (
